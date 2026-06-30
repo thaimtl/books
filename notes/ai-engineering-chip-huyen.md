@@ -22,7 +22,6 @@ How to build *applications on top of* foundation models. Many fundamental concep
 I put Claude generated notes on chapters that I haven't read yet and will integrate my own notes and mark it "Done" once I have finished the reading myself:p
 
 ### 1. Introduction to Building AI Applications with Foundation Models (Done)
-<<<<<<< HEAD
 - **Evolution:** "ML → Language Model (LM) → LLM → Foundation Model"
 - An **LM is one of many ML algorithms.** Others: object detection, topic modeling, recommender systems, weather forecasting, stock-price prediction, etc. The LM is special because it's trained with **self-supervision**, while the others use **supervision**.
 - An **LM encodes statistical information** about one or more languages. Intuitively, this tells us *how likely a word is to appear in a given context.* For example, **Claude Shannon** — the GOAT, celebrated as the *"father of the digital age,"* who laid the theoretical foundations for modern computers, digital circuits, and information theory — used more sophisticated statistics to decipher enemies' messages during WWII. Many concepts from his paper *"Prediction and Entropy of Printed English"* are still used in LMs today.
@@ -61,36 +60,6 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
   3. **Post-training** — conceptually the same as finetuning. Convention: it's *post-training* when done by the model's own developers, *finetuning* when done by application developers.
 - **Dataset engineering:** curating, generating, and annotating the data needed for training and adapting AI models. In AI engineering, data manipulation is more about *deduplication, tokenization, context retrieval, and quality control* — including removing sensitive information and toxic data.
 - **Inference optimization:** making models faster and cheaper. A challenge with foundation models is that they're often *autoregressive*: if it takes 10 ms to generate one token, a 100-token output takes a full second — and longer outputs take even more. Since users are notoriously impatient (*rip attention span*), getting latency down to the ~100 ms expected of a typical internet app is a huge challenge. Inference optimization is an active subfield in both industry and academia.
-=======
-- "ML → Language model → LLM → foundation model" 
-- LM is one of many ML algos. Other are object detection, topic modelling, recommender systems, weather forecasting, stock price prediction, etc. LM is special due to self-supervision training while other supervision.
-- LM encodes statistical information about one or more languages. Intuitively, this information tells us how likely a word is to appear in a given context. For example, Claude Shannon (the goat celeberated as "father of the digital age" who laid the theoretical foundations for modern computers, digital circuits, and information theory) used more sophisticated statistics to decipher enemies’ messages during the 2nd World War. Many concepts introducing in his paper "Prediction and Entropy of Printed English" are still used for LM today.
-- LM can involve multiple languages. Basic unit of a LM is a token (char/part of word). On average, 100 tokens ~= 75 words. Set of all tokens is vocabulary. GPT-5.5 roughly 200,000 to 256,000 tokens. Anthropic’s Claude Opus 4.8 roughly 200,000 tokens. GPT-4 and before are all roughly 100,000 tokens. 
-- 2 types of LM: masked lm (trained to predict missing tokens anywhere in a sequence using context from before and after - like fill in a blank), autoregressive lm (predict the nxt token in sequence - model of choice for text generation). 
-- Supervision: label examples to show behaviors to model to train them. Once trained, the model can be applied to new data. Ex: fraud detection model. Success in 2010s, started deep learning revolution. Drawback: data labelling is expensive (not all labelling tasks are simple). 
-
-- Self-supervision: the model infers labels from input data
-- LM scales up to become LLM. Size: number of parameters. Parameter: variable within an ML model that is updated through the training proces. In general (not always true), more paremeters, more capacity to learn desired behaviors. Ex: GPT-2 has 1.5 billion parameters. GPT-5 unit is trillions now, no source. Larger model is trained more efficiently on large dataset (same with small models). 
-- For a long time, AI research was divided by data modalities. NLP deals only with text. CV deals only with vision. Audio-only models can handle speech, etc. A model that can work with more than 1 data modality is multimodal model. A generative multimodal model is LMM (generating the next token based on text and other data modalities). Hence, the term foundation models. Task specific to general purpose. We can also tweak a general purpose model to maximize its performance on a specific task.
-- Prompt Engineering: Craft detail instructions with examples of desirable outcomes. 
-- RAG (Retrieval-augmented generation): Use DB to supplemeent the instructions.
-- Finetuning: further train the model on a dataset of high-quality outcomes.
-
-- 3 types of competitive advantages (moats) in AI : technology, data and distribution. With foundation models, core techs will be similar for most. Distribution likely belongs to big companies. If a startup can get to market first and gather sufficient usage data to continually improve their products, data will be their moat. Successful companies whose original products could have been features of larger products: Calendly, Mailchimp, Photoroom. 
-- There are 3 layers to any AI app stack:
-1. App development (interfaces, provide model with good prompts and necessary context, evaluation)
-2. Model development (tooling for developing models: frameworks for modeling, training, fine tuning and inference optimization, dataset engineering) : most commonly associated with traditional ML engineering. modeling and training + dataset engineering + inference optimization + evaluation. Modeling and training refers to the process of coming up with a model architecture, training it and finetuning it. Tools: Google's TensorFlow, Hugging Face's Transformers, Meta's Pytorch. Different types of ML algos: clustering, logistic regression, decision trees, collaborative filtering. Neural netowrk architectures: feedforward, recurrent, convolutional, and transformer. How model learn: gradient descent, loss function, regularization, etc.  
-3. Infra (tooling for model serving, managing data and compute, and monitoring)
-- Model adaption techniques can be divided into 2 categories: prompt-based techniques (prompt engineering), fine tuning (updating model weights). Fine tuning is more complicated, require more data, but can improve model's quality, latency and cost SIGNIFICANTLY. Adapting the model to a new task is usually the use case. 
-
-- Training always involves changing model weights but not all changes to model weights constitute training. For example, quantization, reducing the precision of model weights. Different phases: 
-1. Pre-training (train a model from scratch - the weights are randomly initialized): the most resource-intensive by a long shot in terms of compute, data resources and time. An art only a few pratice 
-2. Fine-tuning (continuing to train a previously trained model - the weights are obtained from previous training process): require fewer resources.
-3. Post-training : conceptually same as fine-tuning. Usually, post-training by the model own developers, finetuning when its by application developers. 
-
-- Dataset engineering refers to curating, generating, and annotating the data needed for training and adapting AI models.In AI engineering, data manipulation is more about deduplication, tokenization, context retrieval, and quality control, including removing sensitive information and toxic data.
-- Inference optimization means making models faster and cheaper. One challenge with foundation models is that they are often autoregressive. If it takes 10 ms for a model to generate a token, it’ll take a second to generate an output of 100 tokens, and even more for longer outputs. As users are getting notoriously impatient (rip attention span), getting AI applications’ latency down to the 100 ms latency expected for a typical internet application is a huge challenge Inference optimization is an active subfield in both industry and academia.
->>>>>>> 0b69d52d509b17e9b6a25a30327d255c13ba3378
 
 
 ### 2. Understanding Foundation Models
