@@ -5,6 +5,7 @@
 | **Author** | Chip Huyen |
 | **Published** | 2024 (O'Reilly) |
 | **Status** | Reading |
+| **Date read** | June 2026 (Better late than never:p) |
 | **Rating** | _<!-- /5 -->_ |
 | **Tags** | `llm` `foundation-models` `ml-systems` `rag` `evaluation` |
 
