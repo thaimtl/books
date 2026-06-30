@@ -13,7 +13,7 @@
 
 ## Short summary
 
-How to build *applications on top of* foundation models. Many fundamental concepts about AI and ML are concisely explained. The whole book is organized around adapting an existing model to our needs, or to put it blunty: how to build an AI wrapper saas app:D
+How to build *applications on top of* foundation models. Many fundamental concepts about AI and ML are concisely explained. The whole book is organized around adapting an existing model to our needs, or to put it bluntly: how to build a good AI saas app:D
 
 ---
 
