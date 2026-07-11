@@ -63,8 +63,12 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
 
 
 ### 2. Understanding Foundation Models
-- **Training data** decides the ceiling, a model is only as good (and as biased / language-skewed) as its corpus.
-- **Modeling:** transformer architecture, model size, and **scaling laws** (performance scales predictably with compute/data/params). Bigger isn't always the answer, data quality matters.
+- An AI model is only as good as the data it was trained on. Improve the model by including more data for the task it is trained for in the training data.
+- Common source of training data is Common Crawl, non profit. Google has a subset of them  (C4 - Colossal Clean Crawled Corpus). Data quality of these guys are questionable (including clickbait, misinformation, propoaganda, racism, etc. highkey sketchy websites). Some teams use heuristics to filter out low-quality data from the internet. OpenAI used only the Reddit links that received at least three upvotes to train GPT-2. A model trained with a smaller amount of high-quality data might
+outperform a model trained with a large amount of low-quality data.
+- Tokenization can be much more efficient for some languages than others. A model's inference latency and cost is proportional to the number of tokens in the input and response. To address this, many models have been trained to focus on non-English languages.
+- Even though general-purpose foundation models can answer everyday questions about different domains, they are unlikely to perform well on domain-specific tasks, especially if they never saw these tasks during training. Training data can only be divided to include a few domains (you cant include them all - jack of all trades is master of none). Drug discovery and cancer screening. Their data are unlikely to be found in publicly available internet data. Thus, the need for data curation.
+--
 - **Post-training** is what makes a raw model usable:
   - *Supervised finetuning (SFT)* → teaches it to follow instructions.
   - *Preference finetuning (RLHF / DPO)* → aligns outputs with human preference.
