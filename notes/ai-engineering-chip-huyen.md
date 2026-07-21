@@ -47,12 +47,13 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
   - Successful companies whose original products *could* have been features of a larger product: Calendly, Mailchimp, Photoroom.
 - **3 layers to any AI app stack:**
   1. **App development**: interfaces, providing the model with good prompts and necessary context, evaluation.
-  2. **Model development**: tooling for developing models: frameworks for modeling, training, finetuning, inference optimization, and dataset engineering. *Most commonly associated with traditional ML engineering.* Modeling & training = coming up with a model architecture, training it, and finetuning it.
+  2. **Model development**: tooling for developing models: frameworks for modeling, training, finetuning, inference optimization, and dataset engineering.
+*Most commonly associated with traditional ML engineering.* Modeling & training = coming up with a model architecture, training it, and finetuning it.
      - *Tools:* Google's TensorFlow, Hugging Face's Transformers, Meta's PyTorch.
      - *ML algorithm types:* clustering, logistic regression, decision trees, collaborative filtering.
      - *Neural network architectures:* feedforward, recurrent, convolutional, transformer.
      - *How models learn:* gradient descent, loss functions, regularization, etc.
-  3. **Infra**: tooling for model serving, managing data and compute, and monitoring.
+  6. **Infra**: tooling for model serving, managing data and compute, and monitoring.
 - **Model adaptation splits into 2 categories:** *prompt-based techniques* (prompt engineering) and *finetuning* (updating model weights). Finetuning is more complicated and needs more data, but can improve a model's quality, latency, and cost **SIGNIFICANTLY.** Adapting the model to a new task is usually the use case.
 - **Training always changes model weights, but not all weight changes count as training.** E.g., *quantization* (reducing the precision of model weights) is not training. The different phases:
   1. **Pre-training**: train a model from scratch (weights randomly initialized). By far the most resource-intensive in compute, data, and time. *An art only a few practice.*
@@ -73,12 +74,17 @@ outperform a model trained with a large amount of low-quality data.
   1. **Prefill**: Model processes the input tokens in parallel
   2. **Decode**: Model generates 1 output token at a time
 - The attention mechanism leverages key K, value V, and query Q vectors. Q represents the current state of the decoder at each decoding step. Each K represents a previous token. Previous tokens include both input and previous generated tokens. Each V represents the actual value of a previous token, as learned by the model. The attention mechanism computes how much attention to give an input token by performing a dot product between Q and K. High score means that the model will use more of its V when decoding. Because each previous token has a corresponding key and value vector, the longer the sequence,  the more key and value vectors need to be computed and stored. This is one reason why it’s so hard to extend context length for transformer models.
+. Model performance depends on the model size and the dataset size. Bigger models and bigger datasets require more compute. Compute costs money
+. While the cost for the same model performance is decreasing, the cost for model performance improvement remains high.
+- Until now, every order of magnitude increase in model size has led to an increase in model performance.
+- Bottlenecks for scaling: training data and electricity. Due to changes in its Terms of Service and crawling restrictions, a full 45% of C4 is now restricted.
+- Pre-training to reading to acquire knowledge, while post-training is like learning how to use that knowledge.
+- If you input “How to make pizza” into the model, the model will continue to complete this sentence, as the model has no concept that this is supposed to be a conversation
+- **Post-training** is what makes a raw model (which was only optimized for text completion, not conversations and ouputs can be wrong if it was pre-trained on data indiscriminately scraped from the internet) usable:
+  - *Supervised finetuning (SFT)* → teaches it to follow instructions (demonstration data), how it should behave - behavior cloning. Finetune the pre-trained model on highquality instruction data to optimize models for conversations instead of completion.
+  - *Preference finetuning (RLHF / DPO)* → aligns outputs with human preference.  Further finetune the model to output responses that align with human preference. Preference finetuning is typically done with reinforcement learning (RL)
+  - <img width="632" height="373" alt="image" src="https://github.com/user-attachments/assets/22b03b23-a42f-41fa-9e28-cebd890e4741" />
 
-
-
-- **Post-training** is what makes a raw model usable:
-  - *Supervised finetuning (SFT)* → teaches it to follow instructions.
-  - *Preference finetuning (RLHF / DPO)* → aligns outputs with human preference.
 - **Sampling** is the source of both magic and pain:
   - Temperature, top-k, top-p control randomness.
   - The model is **probabilistic**: same input can give different outputs. This *is* the creativity, and also the inconsistency.
