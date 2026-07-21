@@ -68,7 +68,14 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
 outperform a model trained with a large amount of low-quality data.
 - Tokenization can be much more efficient for some languages than others. A model's inference latency and cost is proportional to the number of tokens in the input and response. To address this, many models have been trained to focus on non-English languages.
 - Even though general-purpose foundation models can answer everyday questions about different domains, they are unlikely to perform well on domain-specific tasks, especially if they never saw these tasks during training. Training data can only be divided to include a few domains (you cant include them all - jack of all trades is master of none). Drug discovery and cancer screening. Their data are unlikely to be found in publicly available internet data. Thus, the need for data curation.
---
+- Transformer Architecture (based on attention mechanism) wasx popularized on the heels of the success of the seq2seq (which was already good at machine translation - Google Translate - and summarization). seq2seq uses RNNs (recurrent neural networks) as its encoder and decoder. 2 main problems with it: generating output tokens using only the final hiddenm state of the input (generating answers about a book using the book summary) and slow for long sequences. Transformer addresses both problems with the attention mechanism (and also without RNNs). It allows the model to weigh the importance of different input tokens when generating each output token (generating answers by referencing any page in the book). Input tokens can be processed in parallel, but it still has the sequential output bottleneck.
+- Inference for transformer-based language models:
+  1. **Prefill**: Model processes the input tokens in parallel
+  2. **Decode**: Model generates 1 output token at a time
+- The attention mechanism leverages key K, value V, and query Q vectors. Q represents the current state of the decoder at each decoding step. Each K represents a previous token. Previous tokens include both input and previous generated tokens. Each V represents the actual value of a previous token, as learned by the model. The attention mechanism computes how much attention to give an input token by performing a dot product between Q and K. High score means that the model will use more of its V when decoding. Because each previous token has a corresponding key and value vector, the longer the sequence,  the more key and value vectors need to be computed and stored. This is one reason why it’s so hard to extend context length for transformer models.
+
+
+
 - **Post-training** is what makes a raw model usable:
   - *Supervised finetuning (SFT)* → teaches it to follow instructions.
   - *Preference finetuning (RLHF / DPO)* → aligns outputs with human preference.
