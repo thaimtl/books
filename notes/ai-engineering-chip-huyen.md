@@ -5,7 +5,7 @@
 | **Author** | Chip Huyen |
 | **Published** | 2024 (O'Reilly) |
 | **Status** | Reading |
-| **Date read** | June 2026 (Better late than never:p) |
+| **Date read** | June 2026  |
 | **Rating** | _<!-- /5 -->_ |
 | **Tags** | `llm` `foundation-models` `ml-systems` `rag` `evaluation` |
 
@@ -13,7 +13,7 @@
 
 ## Short summary
 
-How to build *applications on top of* foundation models. Many fundamental concepts about AI and ML are concisely explained. The whole book is organized around adapting an existing model to our needs, or to put it bluntly: how to build a `good` AI saas wrapper:D
+How to build *applications on top of* foundation models. Many fundamental concepts about AI and ML are concisely explained. The whole book is organized around `adapting` an existing model to our needs. 
 
 ---
 
@@ -69,7 +69,7 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
 outperform a model trained with a large amount of low-quality data.
 - Tokenization can be much more efficient for some languages than others. A model's inference latency and cost is proportional to the number of tokens in the input and response. To address this, many models have been trained to focus on non-English languages.
 - Even though general-purpose foundation models can answer everyday questions about different domains, they are unlikely to perform well on domain-specific tasks, especially if they never saw these tasks during training. Training data can only be divided to include a few domains (you cant include them all - jack of all trades is master of none). Drug discovery and cancer screening. Their data are unlikely to be found in publicly available internet data. Thus, the need for data curation.
-- Transformer Architecture (based on attention mechanism) wasx popularized on the heels of the success of the seq2seq (which was already good at machine translation - Google Translate - and summarization). seq2seq uses RNNs (recurrent neural networks) as its encoder and decoder. 2 main problems with it: generating output tokens using only the final hiddenm state of the input (generating answers about a book using the book summary) and slow for long sequences. Transformer addresses both problems with the attention mechanism (and also without RNNs). It allows the model to weigh the importance of different input tokens when generating each output token (generating answers by referencing any page in the book). Input tokens can be processed in parallel, but it still has the sequential output bottleneck.
+- Transformer Architecture (based on attention mechanism) was popularized on the heels of the success of the seq2seq (which was already good at machine translation - Google Translate - and summarization). seq2seq uses RNNs (recurrent neural networks) as its encoder and decoder. 2 main problems with it: generating output tokens using only the final hidden state of the input (generating answers about a book using the book summary) and slow for long sequences. Transformer addresses both problems with the attention mechanism (and also without RNNs). It allows the model to weigh the importance of different input tokens when generating each output token (generating answers by referencing any page in the book). Input tokens can be processed in parallel, but it still has the sequential output bottleneck.
 - Inference for transformer-based language models:
   1. **Prefill**: Model processes the input tokens in parallel
   2. **Decode**: Model generates 1 output token at a time
@@ -78,13 +78,14 @@ outperform a model trained with a large amount of low-quality data.
 . While the cost for the same model performance is decreasing, the cost for model performance improvement remains high.
 - Until now, every order of magnitude increase in model size has led to an increase in model performance.
 - Bottlenecks for scaling: training data and electricity. Due to changes in its Terms of Service and crawling restrictions, a full 45% of C4 is now restricted.
-- Pre-training to reading to acquire knowledge, while post-training is like learning how to use that knowledge.
+- Pre-training: reading to acquire knowledge, post-training: learning how to use that knowledge.
 - If you input “How to make pizza” into the model, the model will continue to complete this sentence, as the model has no concept that this is supposed to be a conversation
 - **Post-training** is what makes a raw model (which was only optimized for text completion, not conversations and ouputs can be wrong if it was pre-trained on data indiscriminately scraped from the internet) usable:
-  - *Supervised finetuning (SFT)* → teaches it to follow instructions (demonstration data), how it should behave - behavior cloning. Finetune the pre-trained model on highquality instruction data to optimize models for conversations instead of completion.
-  - *Preference finetuning (RLHF / DPO)* → aligns outputs with human preference.  Further finetune the model to output responses that align with human preference. Preference finetuning is typically done with reinforcement learning (RL)
-  - <img width="632" height="373" alt="image" src="https://github.com/user-attachments/assets/22b03b23-a42f-41fa-9e28-cebd890e4741" />
+  - *Supervised finetuning (SFT)* → teaches it to follow instructions ( by providing examples of prompt <-> expected response; we called this `demonstration data`), how it should behave - behavior cloning. Finetune the pre-trained model on highquality instruction data to optimize models for conversations instead of completion.
 
+  - *Preference finetuning (RLHF / DPO - Direct Preference Optimization)* → aligns outputs with human preference. Further finetune the model to output responses that align with human preference. It is typically done with reinforcement learning (RL). This is like teaching a model how to behave in a correct way (teaching it to not comply to requestlike hack someone's website or make a bomb, hijack a plane type of stuff). Teach it to define, detect and reply to controversial issues.
+  - <img width="632" height="373" alt="image" src="https://github.com/user-attachments/assets/22b03b23-a42f-41fa-9e28-cebd890e4741" />
+  - There is 2 parts to RLHF. First, train a reward model to score the foundation's model output. Then, optimize the foundation model to generate responses for which reward model will give max scores. For reward model, evaluating each sample independently (pointwise evaluation) is very important to obtain reliable/consistent data.
 - **Sampling** is the source of both magic and pain:
   - Temperature, top-k, top-p control randomness.
   - The model is **probabilistic**: same input can give different outputs. This *is* the creativity, and also the inconsistency.
