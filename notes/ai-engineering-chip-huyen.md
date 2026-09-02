@@ -63,7 +63,7 @@ I put Claude generated notes on chapters that I haven't read yet and will integr
 - **Inference optimization:** making models faster and cheaper. A challenge with foundation models is that they're often *autoregressive*: if it takes 10 ms to generate one token, a 100-token output takes a full second, and longer outputs take even more. Since users are notoriously impatient (*rip attention span*), getting latency down to the ~100 ms expected of a typical internet app is a huge challenge. Inference optimization is an active subfield in both industry and academia.
 
 
-### 2. Understanding Foundation Models
+### 2. Understanding Foundation Models (Done)
 - An AI model is only as good as the data it was trained on. Improve the model by including more data for the task it is trained for in the training data.
 - Common source of training data is Common Crawl, non profit. Google has a subset of them  (C4 - Colossal Clean Crawled Corpus). Data quality of these guys are questionable (including clickbait, misinformation, propoaganda, racism, etc. highkey sketchy websites). Some teams use heuristics to filter out low-quality data from the internet. OpenAI used only the Reddit links that received at least three upvotes to train GPT-2. A model trained with a smaller amount of high-quality data might
 outperform a model trained with a large amount of low-quality data.
