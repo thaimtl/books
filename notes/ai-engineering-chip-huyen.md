@@ -86,11 +86,16 @@ outperform a model trained with a large amount of low-quality data.
   - *Preference finetuning (RLHF / DPO - Direct Preference Optimization)* → aligns outputs with human preference. Further finetune the model to output responses that align with human preference. It is typically done with reinforcement learning (RL). This is like teaching a model how to behave in a correct way (teaching it to not comply to requestlike hack someone's website or make a bomb, hijack a plane type of stuff). Teach it to define, detect and reply to controversial issues.
   - <img width="632" height="373" alt="image" src="https://github.com/user-attachments/assets/22b03b23-a42f-41fa-9e28-cebd890e4741" />
   - There is 2 parts to RLHF. First, train a reward model to score the foundation's model output. Then, optimize the foundation model to generate responses for which reward model will give max scores. For reward model, evaluating each sample independently (pointwise evaluation) is very important to obtain reliable/consistent data.
-- **Sampling** is the source of both magic and pain:
-  - Temperature, top-k, top-p control randomness.
-  - The model is **probabilistic**: same input can give different outputs. This *is* the creativity, and also the inconsistency.
-  - **Hallucination**, two proposed causes: (1) the model can't separate given facts from its own generations; (2) mismatch between its internal knowledge and the training labels.
-  - Structured outputs (JSON, etc.) constrain sampling to a schema.
+- A model constructs its outputs through sampling, making AI outputs probabilistic. To generate the next token, the language model first computes the probability distribution over all tokens in the vocabulary. Greedy sampling = pick the most likely (has highest probability) outcome. This often works for classification tasks, but for a LM, this creates boring outputs because it would always respond with the most common words. Instead of this, the model can sample the next token according to the probability distribution over all possible values 
+  - Temperature, top-k, top-p control randomness are `sampling strategies`. 
+  - To redistribute the probabilities of the possible values, we can sample with temperature. A higher T reduces P of common tokens, which results to increase P of rarer tokens, enabling models to create more creative responses, but potentially less coherent.
+  - To reduce the computation workload w/o sacrificing too much of the model's response diversity (For large vocab). Sample from top k values. Smaller k value makes the text more predictable but less interesting, as the model is limited to a smaller set of likely words.
+  - Top p (nucleus sampling) allows for a more dynamic selection of values to be sampled from. Model sums the Ps of the most likely next values in descending order and stops when the sum reaches p. Typical range: 0.9 to 0.95. For example top p = 0.9 means that the model will consider the smallet set of values whose cumulative P exceeds 90%.
+  - min p : set the min P that a token must reach to be considered during sampling.
+  - Test time compute: to improve a model's response quality, generate multiple responses per query to increase the chance of good responses. One way to do it is best of N techniques, randomly generate multiple outputs and pick one that works best.
+  - **Inconsistency** is when a model generates very different responses for the same input or slightly different input.
+  - **Hallucination** is when a model gives a response that isn't grounded in facts. Two proposed causes: (1) the model can't separate given facts from its own generations; (2) mismatch between its internal knowledge and the training labels.
+  - Structured outputs (JSON, etc.) constrain sampling to a schema. Post-processing: write a script to correc t mistakes model makes (small and easy to fix errors). 
 
 ### 3. Evaluation Methodology
 - The book's thesis-within-a-thesis: **evaluation is the hardest, most under-invested part of AI engineering.** Open-ended outputs have no single right answer.
