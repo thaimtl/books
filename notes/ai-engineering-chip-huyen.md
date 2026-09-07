@@ -99,7 +99,20 @@ outperform a model trained with a large amount of low-quality data.
 
 ### 3. Evaluation Methodology
 - The book's thesis-within-a-thesis: **evaluation is the hardest, most under-invested part of AI engineering.** Open-ended outputs have no single right answer.
-- Language-modeling metrics: **perplexity / cross-entropy**, useful signal, but don't measure task usefulness.
+- Eval aims to mitigate risks and uncover opportunities. Identify places the system is likely to fail and design the eval around them. Enhance visibility into the system's failure by redesigning it. Have a clear understanding of the system to make it more robust. 
+- Systematic eval to make the results more reliable.
+- Language-modeling metrics: **perplexity / cross-entropy**, BPC, BPB - useful signal, but don't measure task usefulness.
+- Entropy measures how much information, on average, a token carries. high entropy -> more info carried -> more bits needed 
+- Cross Entropy on a dataset measures how difficult it is for the language model to predict what comes next in the dataset. It depends on the training data's entropy (predictability) and how the distribution captured by the LM diverges from the true distribution of the training data.
+- For example, if cross entropy of an LM is 6 bits, this LM needs 6 bits to represent each token. It tells us how efficient a LM will be at compressing text. 
+- To compare between models, use BPC (bits per character) to compare the number of bits per token across models (since each model might have different tokenization method: 1 word = 1 token or 1 char = 1 token). 
+- A more standardized metric would be bits-per-byte (BPB), the number of bits a LM needs to represent 1 byte of the original training data.
+- For example, BPB of a LM is 3.43, this means it can represent each original byte (1 byte = 8 bits) using 3.43 bits. 
+- Perplexity (PPL) is the exponential of entropy and cross entropy. It measures the amount of uncertainty a model has when predicting the next token (cross entropy measures the difficulty). 
+- Some general rules: 
+    1. More structured data gives lower expected PPL. PPL of model on HTML code is lower than that on everyday text. 
+    2. Bigger vocab -> Higher PPL
+    3. Longer context -> Lower PPL
 - Exact evaluation (functional correctness, similarity to reference) vs. **subjective evaluation**.
 - **AI as a judge:** use a strong model to grade outputs, scalable but biased: *position bias*, *verbosity bias* (prefers longer answers), *self-bias* (prefers its own style).
 - **Comparative evaluation:** rank models head-to-head (the basis of leaderboards like Chatbot Arena).
