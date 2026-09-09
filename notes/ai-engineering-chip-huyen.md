@@ -114,6 +114,9 @@ outperform a model trained with a large amount of low-quality data.
     2. Bigger vocab -> Higher PPL
     3. Longer context -> Lower PPL
 - Exact evaluation (functional correctness, similarity to reference) vs. **subjective evaluation**.
+- Functional correctness: evaluating a sys based on whether it performs the intended functionality. Code generation is example of a task where functional correctness measurement can be automated (execution accuracy). In SWE (long before AI), code is validated with unit **tests**. This is how coding platforms like LC, HackerRank validate the submitted solutions. 
+- Popular benchmarks for evaluating AI's code generation capabilities: OpenAI's HumanEval, Google's MBPP
+- If a task cannot be automatically evaluated using functional correctness, one common approach is to evaluate AI's outputs against refrence data.
 - **AI as a judge:** use a strong model to grade outputs, scalable but biased: *position bias*, *verbosity bias* (prefers longer answers), *self-bias* (prefers its own style).
 - **Comparative evaluation:** rank models head-to-head (the basis of leaderboards like Chatbot Arena).
 
