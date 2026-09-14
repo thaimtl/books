@@ -97,7 +97,7 @@ outperform a model trained with a large amount of low-quality data.
   - **Hallucination** is when a model gives a response that isn't grounded in facts. Two proposed causes: (1) the model can't separate given facts from its own generations; (2) mismatch between its internal knowledge and the training labels.
   - Structured outputs (JSON, etc.) constrain sampling to a schema. Post-processing: write a script to correc t mistakes model makes (small and easy to fix errors). 
 
-### 3. Evaluation Methodology
+### 3. Evaluation Methodology (Done)
 - The book's thesis-within-a-thesis: **evaluation is the hardest, most under-invested part of AI engineering.** Open-ended outputs have no single right answer.
 - Eval aims to mitigate risks and uncover opportunities. Identify places the system is likely to fail and design the eval around them. Enhance visibility into the system's failure by redesigning it. Have a clear understanding of the system to make it more robust. 
 - Systematic eval to make the results more reliable.
@@ -116,9 +116,11 @@ outperform a model trained with a large amount of low-quality data.
 - Exact evaluation (functional correctness, similarity to reference) vs. **subjective evaluation**.
 - Functional correctness: evaluating a sys based on whether it performs the intended functionality. Code generation is example of a task where functional correctness measurement can be automated (execution accuracy). In SWE (long before AI), code is validated with unit **tests**. This is how coding platforms like LC, HackerRank validate the submitted solutions. 
 - Popular benchmarks for evaluating AI's code generation capabilities: OpenAI's HumanEval, Google's MBPP
-- If a task cannot be automatically evaluated using functional correctness, one common approach is to evaluate AI's outputs against refrence data.
-- **AI as a judge:** use a strong model to grade outputs, scalable but biased: *position bias*, *verbosity bias* (prefers longer answers), *self-bias* (prefers its own style).
+- If a task cannot be automatically evaluated using functional correctness, one common approach is to evaluate AI's outputs against refrence data. Exact Match. Lexical Similarity (fuzzy search, for example. Measuring whether 2 texts look similar). Semantic Similarity computes the similarity in semantics (meaning in language and logic). 
+- Semantic Similarity. First, text -> numerical representation: embedding. The similarity between two embeddings can be computed using metrics such as cosine similarity [-1,1]. The size of an embedding vector is usually between 100 and 100,000.
+- **AI as a judge:** use a strong model to grade outputs, scalable but biased: *position bias*, *verbosity bias* (prefers longer answers), *self-bias* (prefers its own style). AI judges, like all AI applications, should be iterated upon. This makes them unreliable as benchmarks to track an application's changes over time. They should be supplemented with exact evaluation, human evaluation, or both.
 - **Comparative evaluation:** rank models head-to-head (the basis of leaderboards like Chatbot Arena).
+- **Preference models**: specialized AI judges that predict which response users prefer
 
 ### 4. Evaluate AI Systems
 - Evaluation criteria to define up front: **domain-specific capability, generation quality (factual consistency, safety), instruction-following, cost, and latency.**
