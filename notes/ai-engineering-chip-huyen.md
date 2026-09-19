@@ -122,9 +122,15 @@ outperform a model trained with a large amount of low-quality data.
 - **Comparative evaluation:** rank models head-to-head (the basis of leaderboards like Chatbot Arena).
 - **Preference models**: specialized AI judges that predict which response users prefer
 
-### 4. Evaluate AI Systems
+### 4. Evaluate AI Systems (Done)
+<img width="1262" height="713" alt="image" src="https://github.com/user-attachments/assets/539c5175-765e-43e5-842c-8a262a040bbc" />
+
+- A reliable AI eval pipeline enables risk reducing, performance improving.
+- The challenge is no longer developing models, but selecting the right model for your application.
+-> **Model selection:** build vs. buy; open-weight (self-host, control, privacy) vs. commercial API (easy, capable, but lock-in + data concerns). Decision hinges on your eval criteria, not hype.
 - Evaluation criteria to define up front: **domain-specific capability, generation quality (factual consistency, safety), instruction-following, cost, and latency.**
-- **Model selection:** build vs. buy; open-weight (self-host, control, privacy) vs. commercial API (easy, capable, but lock-in + data concerns). Decision hinges on your eval criteria, not hype.
++ Many criteria evolved from traditional NLP such as fluency, coherence, and faithfulness.  
+- Public benchmarks can help weed out the bad models, but not find best models for your apps since they are also likely to be contaminated (their data is included in training data of many models). Public leaderboards aggregate multiple benchmarks to rank models. So you can create a private leaderboard to rank models for your needs.
 - **Build an evaluation pipeline**: don't eyeball it. Define metrics, curate an eval set, automate, and keep it versioned.
 
 ### 5. Prompt Engineering
