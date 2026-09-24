@@ -132,6 +132,7 @@ outperform a model trained with a large amount of low-quality data.
 + Many criteria evolved from traditional NLP such as fluency, coherence, and faithfulness.  
 - Public benchmarks can help weed out the bad models, but not find best models for your apps since they are also likely to be contaminated (their data is included in training data of many models). Public leaderboards aggregate multiple benchmarks to rank models. So you can create a private leaderboard to rank models for your needs.
 - **Build an evaluation pipeline**: don't eyeball it. Define metrics, curate an eval set, automate, and keep it versioned.
+- Coincidently, while I was reading this, Dario Amodei dropped the [essay](https://darioamodei.com/post/we-must-pace-the-frontier) on pacing frontier models (a proposal to spend more time to do eval and make sure we have good model alignment, so agent swarm goes rouge like ChatGPT hacking HuggingFace to pass the benchmarks or agents leaving small traces that trigger self duplication incidents won't happen again). Yoshua Bengio also recently gave a speech at UN about this. Seems like eval has become the bottleneck now (releasing strong model is easy, but how to make sure it aligns and wont go rouge is the bigger problem, especially when models are getting stronger and stronger). 
 
 ### 5. Prompt Engineering
 - The cheapest lever. Best practices: be explicit, give examples (few-shot), break tasks into steps (chain-of-thought), provide a persona/role, specify output format.
