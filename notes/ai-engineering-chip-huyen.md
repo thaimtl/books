@@ -134,7 +134,7 @@ outperform a model trained with a large amount of low-quality data.
 - **Build an evaluation pipeline**: don't eyeball it. Define metrics, curate an eval set, automate, and keep it versioned.
 - Coincidently, while I was reading this, Dario Amodei dropped the [essay](https://darioamodei.com/post/we-must-pace-the-frontier) on pacing frontier models (a proposal to spend more time to do eval and make sure we have good model alignment, so agent swarm goes rouge like ChatGPT hacking HuggingFace to pass the benchmarks or agents leaving small traces that trigger self duplication incidents won't happen again). Yoshua Bengio also recently gave a speech at UN about this. Seems like eval has become the bottleneck now (releasing strong model is easy, but how to make sure it aligns and wont go rouge is the bigger problem, especially when models are getting stronger and stronger). 
 
-### 5. Prompt Engineering
+### 5. Prompt Engineering (Done)
 - Prompt engineering is crafting instructions to get the model to do what you want, without changing the model weights. It's the easiest and cheapest adaptation technique, so max it out before moving to finetuning. Easy to write a prompt, not easy to write an effective one (anyone can communicate, not everyone communicates well). It should be run with the same rigor as any ML experiment: systematic experiments + eval.
 - A prompt usually has 3 parts: **task description** (role, output format), **examples**, and **the task** itself.
 - The less robust a model is to small prompt changes ("5" vs "five", an extra new line), the more fiddling you need. Stronger models are more robust, so using them saves a lot of headaches.
