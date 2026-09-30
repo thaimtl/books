@@ -145,9 +145,14 @@ outperform a model trained with a large amount of low-quality data.
   1. **Be clear and explicit.** Remove ambiguity (score 1-5 or 1-10?), give a persona (a first-grade teacher grades a kid's essay way nicer), give examples, and specify the output format (no preambles, JSON keys).
   2. **Give enough context.** It also reduces hallucination, since without context the model falls back on its unreliable internal knowledge (like an open-book exam).
   3. **Break complex tasks into subtasks** and chain them. Easier to monitor and debug, and simple steps can use cheaper models (e.g., a weak model for intent classification, a strong model for the answer).
-  4. **Give the model time to think** with chain-of-thought ("think step by step") and self-critique. Tradeoff: more latency.
+  4. **Give the model time to think** with chain-of-thought ("think step by step") and self-critique. Tradeoff: more latency. *(Outdated as of 2026: models now think on their own and you set how much with an `effort` knob. Anthropic says to remove "double-check your answer" type instructions since they cause over-verification.)*
   5. **Iterate, version your prompts**, and evaluate them against the whole system, not just 1 step.
   6. Be careful with prompt tools like DSPy. They make hidden API calls (your bill goes brrr) and can have bugs in their default prompts (LangChain's had typos). Always inspect what they generate.
+- **2026 update** (checked against Anthropic's and OpenAI's current prompting docs):
+  - Explain *why* instead of just giving rules ("this will be read aloud, so no ellipses" > "NEVER use ellipses"), and say what to do rather than what not to do.
+  - Put long docs at the top and the question at the end (up to 30% better).
+  - Chaining is still useful when you need to inspect intermediate outputs, but built-in thinking + subagents handle most multi-step work now.
+  - Stop over-prompting. Old tricks like ALL CAPS or "if in doubt, use X" now make models overdo it. Prefill is gone too, so use structured outputs.
 - **Defensive prompt engineering:** prompt attacks work *because* models are trained to follow instructions. The better they follow instructions, the better they follow malicious ones too.
   - 3 types of attacks: **prompt extraction** (steal the system prompt), **jailbreaking / prompt injection** (get the model to do bad things), **information extraction** (leak training data or context).
   - The attacks got more sophisticated over time:
