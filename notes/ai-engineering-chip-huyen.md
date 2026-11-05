@@ -167,14 +167,184 @@ outperform a model trained with a large amount of low-quality data.
   - Measure both the violation rate and the false refusal rate. A model that refuses everything is 100% safe but useless.
 - Risk never goes to zero as long as the system can do anything impactful. This connects to Dario's pacing essay from ch4: stronger models = bigger attack surface, which is exactly why eval and alignment are becoming the bottleneck.
 
-### 6. RAG and Agents
-- **RAG (Retrieval-Augmented Generation):** retrieve relevant context, stuff it into the prompt. Solves the "model lacks information / context window too small" problem.
-  - Retrieval algorithms: **term-based** (BM25/keyword, cheap, exact) vs. **embedding-based** (semantic, vector search). Often hybrid.
-  - RAG quality is *retrieval* quality, garbage retrieved, garbage generated.
-- **Agents:** a model that can **plan** and **use tools** in a loop to accomplish multi-step tasks.
-  - Components: tools (read/write actions), planning, memory.
-  - Failure modes compound, each step's error rate multiplies over a long trajectory. Agents are powerful but fragile; high-stakes actions need guardrails.
-- **Memory** lets agents/chatbots carry context across steps and sessions.
+### 6. RAG and Agents (Done)
+- Ch5 was all about instructions, which stay the same for every request.
+  This chapter is about the other half, the **context**, which is the extra info the model needs for one specific request.
+  The book covers 2 ways to build it, **RAG** and **agents**.
+
+#### RAG
+
+- **RAG (Retrieval-Augmented Generation)** basically means that before the model answers, you go find the info it needs and paste it into the prompt.
+  Someone asks "Can the A300 printer print 100 pages per second?", and the model never saw that printer's specs in training, so on its own it would just guess.
+  With RAG the system looks up the spec sheet first and drops it into the prompt, so now the model is answering from the actual doc.
+- "Context windows are huge now, why not just dump all the docs in the prompt?"
+  But data grows faster than context windows ever will, and models get worse at finding stuff the longer the prompt gets (same needle in a haystack problem from ch5).
+  Every extra token also costs money and time.
+  Anthropic's rule of thumb: if all your docs add up to less than 200K tokens (~500 pages), skip RAG and just put everything in.
+- A RAG system has 2 parts.
+  The **retriever** finds the info, and the **generator** (the LLM) writes the answer from it.
+  The retriever has 2 jobs, **indexing** (organizing your docs ahead of time so they're fast to search) and **querying** (the actual search when a question comes in).
+- Docs are usually too long to paste in whole, so they get cut into smaller pieces called **chunks**, and the retriever searches over those.
+- The answer can only be as good as what the retriever finds.
+  If it grabs the wrong chunks, the model will confidently answer from the wrong info.
+- There are 2 ways to search.
+  The old-school one is keyword search (**term-based retrieval**), where you look for chunks that share words with the question.
+  Problem is, tons of docs might contain the word, and some words matter way more than others.
+- **TF-IDF** handles both problems.
+  **TF** (term frequency) is how many times the word shows up in a doc, and more usually means more relevant.
+  **IDF** (inverse document frequency) is how rare the word is across all your docs.
+  In "easy recipes for vietnamese food", the word "for" is in basically every doc so it tells you nothing, but "vietnamese" is rare, so a doc that has it is probably what you want.
+  Multiply the two for each word in the question, add everything up, and that's the doc's score.
+- **BM25** is TF-IDF plus a fix for doc length, since a long doc mentions every word more often just because it's long.
+  It's from the 1980s and people still have a hard time beating it (Perplexity's CEO even tweeted about this).
+- Elasticsearch stores an **inverted index**, which is just a dictionary from each word to the docs that contain it, same idea as the index at the back of a textbook.
+- The newer way is searching by meaning (**embedding-based retrieval**).
+  An **embedding** is a list of numbers that represents what a piece of text means (ch3), and texts with similar meanings end up with similar numbers.
+  A **vector database** stores those and can quickly find the ones closest to any embedding you give it.
+- If you search "transformer architecture", you won't get docs about the Transformers movie, because the meaning is different even though the word is the same.
+  The flip side is that exact words get blurry, so an error code like `EADDRNOTAVAIL` might slip through.
+
+<img width="600" alt="Figure 6-3: embedding-based retriever" src="images/fig-6-3-semantic-retrieval.png" />
+
+- The dashed lines are the setup you do once, ahead of time.
+  Your docs go into the Splitter and get cut into chunks, the Embedding model turns each chunk into numbers, and those get saved in the VectorDB.
+  The solid lines are what happens every time someone asks a question.
+  (1) The question goes through the *same* embedding model.
+  (2) The Retriever grabs the chunks whose numbers are closest to the question's numbers.
+  (3) The Generative model gets the question plus those chunks and writes the answer.
+- Comparing the question against every single chunk one by one (**k-NN**) is accurate but way too slow once you have millions of chunks.
+  So vector DBs cheat a little with **ANN** (approximate nearest neighbor), which groups similar embeddings together ahead of time so a search only has to check the likely candidates.
+  You lose a bit of accuracy and gain a lot of speed.
+  Names worth recognizing: HNSW, IVF, LSH, product quantization, and FAISS (Facebook's library for this).
+- Keyword search is faster, cheaper, and good out of the box, but there's not much you can tune.
+  Meaning search is slower and pricier (some companies spend 1/5 to 1/2 of their model API budget on the vector DB), but you can finetune it until it wins.
+- In practice people use both, which is called **hybrid search**.
+  One way is to run them in sequence, where a cheap keyword search grabs every doc with "transformer" and then meaning search keeps the ones about neural nets.
+  Re-sorting candidates with a more precise method like that is called **reranking**.
+  The other way is to run both at once and merge the rankings with **reciprocal rank fusion (RRF)**.
+  Each search gives a doc points based on its rank (1st place = 1/1, 2nd = 1/2, and so on) and you add them up, so a doc that's 1st in one search and 2nd in the other gets 1.5.
+  The real formula is 1/(60 + rank), and the 60 controls how much the lower-ranked docs still count.
+- To check if a retriever is any good, **context precision** asks how many of the retrieved docs are actually relevant (got 10, 6 were useful = 60%).
+  **Context recall** asks how many of the relevant docs it managed to find (8 exist, found 6 = 75%).
+  Recall is annoying to measure because someone has to label every doc in the database.
+  Still check the final answers, since a good retriever is one that leads to good answers.
+- The book gives 4 tricks for better retrieval:
+  1. **Chunking**, which is how you cut docs into pieces.
+     You can cut by a fixed size (every 512 words), or cut recursively (by section, then by paragraph if a section is too long, then by sentence) so related text stays together.
+     Chunks should overlap a little at the edges, so "I left my wife a note" doesn't get split into "I left my wife" + "a note" lol.
+     Smaller chunks let you fit more different pieces into the prompt, but each one has less context and you end up with more chunks to embed and store.
+     There's no perfect size, try a few and measure.
+  2. **Reranking** the results with a more precise model, or by date when newer is better (news, emails).
+  3. **Query rewriting**, which turns the user's message into a question that makes sense on its own before you search.
+     If a user asks "When did John Doe last buy something?" and follows up with "How about Emily Doe?", searching "How about Emily Doe?" returns junk.
+     So you ask a model to rewrite it as "When did Emily Doe last buy something?".
+     If the rewriter can't figure out who someone is (like "his wife"), it should say so instead of making up a name.
+  4. **Contextual retrieval**, for when a chunk loses its meaning once it's cut out of the doc.
+     A chunk that says "It grew 3% last quarter" doesn't tell you what "it" is.
+     The fix is to attach extra info to each chunk before indexing it, like tags, the questions it answers ("I forgot my password" for the password reset article), or a short note on where it fits in the doc.
+
+<img width="600" alt="Figure 6-5: Anthropic's contextual retrieval" src="images/fig-6-5-contextual-retrieval.png" />
+
+- Anthropic's version, from left to right: each doc gets split into chunks.
+  For every chunk, Claude reads the *whole doc* plus that chunk and writes 50-100 tokens about where the chunk fits, and that note gets glued to the front of the chunk ("Context 1 + Chunk 1").
+  Then every combined chunk gets indexed twice, once as embeddings in a vector DB and once in a TF-IDF keyword index, so a query searches both (hybrid search again).
+  So the fix for chunks missing context is... an LLM writing the context lol.
+- For images you can search by captions, or use something like CLIP, which puts images and text in the same embedding space so a text question can find a matching picture.
+  For tables, the model turns the question into SQL (**text-to-SQL**), your system runs it, and the model answers from the result.
+  "How many Fruity Fedoras sold in the last 7 days?" becomes `SELECT SUM(units) FROM Sales WHERE ...`.
+
+#### Agents
+
+- The book defines an **agent** as anything that can see its **environment** and act on it, and the tools you give it decide what actions it can take.
+  A coding agent lives in a computer and can navigate the repo, search, view, and edit files.
+  By that definition ChatGPT is an agent (web search, Python, images), and RAG is just a simple agent whose only tool is a retriever.
+- Example: an agent asked to "predict Fruity Fedora sales for the next 3 months".
+  It decides it needs past sales, writes SQL, runs it, notices the data isn't enough, also pulls past marketing campaigns, makes the prediction, and then decides it's done.
+- Agents need stronger models.
+  If each step is right 95% of the time, 10 steps in a row are all right only ~60% of the time (0.95^10), and 100 steps only 0.6%.
+  On top of that, a mistake with tools can do real damage, like deleting data or sending money.
+- Tools fall into 3 buckets:
+  1. Tools that give info, like retrievers, SQL, and web browsing.
+     Without web access a model goes **stale**, meaning it can't know anything that happened after its training data was collected (weather, news, stock prices).
+  2. Tools that cover the model's weaknesses.
+     Models are bad at math, so you just give them a calculator instead of training arithmetic into them.
+     Same idea for code interpreters, unit converters, or a text-to-image model.
+     Chameleon (GPT-4 + 13 tools) beat plain GPT-4 by 11.37% on ScienceQA and 17% on TabMWP.
+  3. Tools that change things (**write actions**).
+     Reading an email is a read action, but sending one is a write action, and so is transferring money or deleting a table.
+     You wouldn't let an intern delete your production database, so don't let an unreliable AI do it either.
+     This is also where the indirect prompt injection from ch5 gets scary, since a sketchy web page could trick an agent that has write tools.
+- A task is a **goal** plus **constraints**.
+  In "plan a 2-week trip from SF to India for $5,000", the trip is the goal and the budget is the constraint.
+  A **plan** is the list of steps to get there, and some plans are way smarter than others.
+  For "how many companies with no revenue have raised at least $1B?", you start from the short list (companies that raised $1B) and filter by revenue, instead of starting from every company with no revenue.
+- Whether LLMs can really plan is still debated, and LeCun says they can't.
+  Planning is basically search (try a path, see where it goes, back up if it's bad), and the author thinks LLMs can back up just by revising the plan.
+- Keep planning and doing separate.
+  If the model plans and executes in one go, it can happily run a bad 1,000-step plan for hours and burn your API money before you notice.
+  So you check the plan first, either with simple rules (reject a plan that uses a tool the agent doesn't have, or has way too many steps) or with an AI judge.
+
+<img width="600" alt="Figure 6-9: decoupling planning and execution" src="images/fig-6-9-plan-then-execute.png" />
+
+- The query goes to the Planner, which writes a plan.
+  The Evaluator checks it, and if it's bad, the bottom line sends it back to the Planner for another try.
+  If it's good, the Executor runs it by calling Tools.
+  The tool outputs go back to the Evaluator so it can check the results, and to the Planner (top line) so it can plan the next step.
+  Once the Evaluator decides the goal is reached, it goes to Finish.
+- Every box in there can be its own model, which is why most agents are secretly multi-agent systems.
+  It also helps to put an **intent classifier** at the front, which is a step that figures out what the user wants (billing question vs password reset) so the agent grabs the right tools, or says it can't help.
+  Humans can jump in anywhere too, like writing the high-level plan or approving risky stuff (updating a database, merging code).
+- **Function calling** is how tool use actually works in code, and the model never runs the tool itself.
+  You describe each tool (name, parameters, what it does), then say which tools are allowed and whether the model must use one (`required`), can't use any (`none`), or gets to decide (`auto`).
+  For "How many kg is 40 pounds?" the model just replies "call `lbs_to_kg` with `lbs=40`", your code runs the function, and you send the result back.
+  Always log the parameters it picked, because it's guessing them.
+- Plans can name exact functions (`get_time()`), which breaks the moment someone renames a tool.
+  Or they can use plain language ("get today's date"), which survives renames but needs a quick step to translate each line into a real call.
+  That translation is easy enough that a cheaper model can do it.
+- Steps don't have to run one after another.
+  They can be sequential (run the SQL after writing it), parallel (check 100 product prices at once), an if (read NVIDIA's earnings, then buy or sell), or a for loop (keep generating random numbers until one is prime).
+  Parallel is the one that really cuts down how long users wait.
+- **Reflection** is the agent checking its own work, which can happen after getting the request (is this even doable?), after planning, after each step, and at the end.
+  **ReAct** does it in a loop, where the model writes a Thought (what to do next and why), takes an Act (calls a tool), reads the Observation (what came back), and repeats.
+  **Reflexion** adds a post-mortem when things fail.
+  An evaluator scores the result, a self-reflection step writes down why it failed ("my code didn't handle arrays where every number is negative"), and the agent tries again with that lesson.
+  Both are cheap to build and they work, but all that thinking costs tokens, so you pay more and wait longer.
+- More tools isn't automatically better.
+  Like a person, an agent gets worse at each tool when it has too many, and every tool description eats up prompt space.
+  Try different sets of tools and do an **ablation**, which just means removing one tool and rerunning your tests.
+  If nothing gets worse, you didn't need that tool.
+  Swap out tools the agent keeps messing up, and look at which ones get used the most and least.
+  Models also have favorites, GPT-4 leaned on knowledge retrieval and ChatGPT on image captioning.
+- Evaluating an agent comes down to listing the ways it can fail and counting how often each one happens.
+  Planning alone can go wrong in a bunch of ways:
+  - calling a tool it doesn't have (`bing_search` when there's no `bing_search`)
+  - using the right tool with the wrong number of parameters (passing 2 to `lbs_to_kg`, which takes 1)
+  - using the right tool with a wrong value (`lbs=100` when it should be 120)
+  - missing the goal or a constraint (asked for Hanoi, plans Ho Chi Minh City, or blows the $5,000 budget)
+  - thinking it's done when it isn't (seats 40 of 50 people in hotel rooms and insists it's finished lol)
+  - taking too long (a grant proposal finished after the deadline is useless)
+- Tools can fail too.
+  Either the right tool gives a wrong answer (an image captioner describes the wrong thing), or the agent doesn't have the tool it needs.
+  Test each tool on its own and print every call with its output.
+- Then there's efficiency, meaning the average steps, cost, and time per task, compared with another agent or a human.
+  AI and people are fast at different things though, since visiting 100 web pages is a slog for a person and trivial for an agent.
+
+#### Memory
+
+- **Internal knowledge** is what's baked into the weights during training, like knowing how to breathe, and it only changes if you retrain the model.
+  **Short-term memory** is the context window, like the name of someone you just met, so it's fast but small and gone after the task.
+  **Long-term memory** is external storage the model searches with a retriever, like your notes and books, and you can edit or delete it without retraining anything.
+
+<img width="600" alt="Figure 6-16: memory hierarchy for an agent" src="images/fig-6-16-memory-hierarchy.png" />
+
+- In this figure, the Model in the middle pulls from 3 places: the Context on the left (short-term), External memory up top through the Retriever (long-term), and Training data at the bottom (internal knowledge).
+  The dotted arrows show where info should live.
+  Info you rarely need should move out of the context into external memory, and info that lots of tasks need should get trained into the model (finetuning, next chapter).
+- Memory is what lets an agent hold more than its context window during a long task, remember you between sessions (an AI coach that forgets your whole life story every time would be useless), stay consistent with what it said before, and keep tables as tables instead of flattening them into text.
+- When the context fills up, something has to decide what stays, and that's **memory management**.
+  The simplest approach is **FIFO** (first in, first out), which drops the oldest messages first.
+  That backfires when the first message is the one explaining what the whole conversation is about.
+  Smarter options are summarizing the conversation, or having the agent decide after each step whether new info should be added, merged with what's already there, or replace something outdated.
 
 ### 7. Finetuning
 - When prompting + RAG aren't enough, and only then (it's the most expensive, most operationally heavy rung).
